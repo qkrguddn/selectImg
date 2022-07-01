@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+            integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+            integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+            crossorigin="anonymous"></script>
+    <title>slide</title>
+    <style>
+        #centerImg {
+            display: block;
+            margin: 40px auto 10px auto;
+            width: 300px;
+        }
+
+        #errorMsg {
+            text-align: center;
+        }
+
+        #summery img {
+            margin-right: 5px;
+            width: 9%;
+        }
+
+        #slider {
+            display: block;
+            width: 100%;
+            height: 100px;
+            margin: 0 auto;
+        }
+
+        #rangeForm input[type=button] {
+            width: 60px;
+            height: 40px;
+        }
+
+        #submitForm {
+            float: right;
+        }
+
+        .slideButton {
+            float: left;
+        }
+
+        #select {
+            position: relative;
+            right: 80px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #frameSize {
+            width: 3.86px;
+            /* img가로 640px 180장, slide가로 696, 696/180=3.86...  */
+            /* width: 40px; */
+            /* height: 40px; */
+        }
+    </style>
+</head>
+<script th:inline="javascript">
+    $(document).ready(() => {
+        const jsonInput = { "id": 1, "cur": 1, "size": 10 };
+        var slider = $("#slider");
+        frameSrc = /*[[ ${webImg.frameName} ]]*/
+            pageNumber =/*[[ ${webImg.pageCount} ]]*/
+            mysqlData =/*[[ ${webImg.mysqlData} ]]*/
+            content = /*[[ ${webImg.content} ]]*/
+            picNumber = [];
+        $("#centerImg").attr("src", "frame/" + frameSrc + "/frame" + "0.png")
+        updateImage = function () {
+            var value = slider.val();
+            $("#centerImg").attr("src", "frame/" + frameSrc + "/frame" + value + ".png");
+        }
+        $("#slider").on('input', function () {//slide움직이면 이미지 변화
+            updateImage();
+            $("#frameNumber").val(slider.val());
+            console.log($("#frameNumber").val());
+        });
+        var playImage;
+        const start = function () {
+            $("#continueImg").attr("value", "정지");
+            playImage = setInterval(add, 20);
+
+        }
+        const stop = function () {
+            clearInterval(playImage);
+            playImage = undefined;
+            $("#continueImg").attr("value", "재생");
+            $("#frameNumber").val(slider.val());
+        }
+        function add() {//start함수에 쓰임
+            var nextValue = parseInt(slider.val()) + 1;
+            slider.val(nextValue);
+            updateImage();
+            $("#frameNumber").val(slider.val());
+            if (slider.attr("max") <= nextValue) stop();
+        }
+        $("#continueImg").on('click', function () {//재생/정지 버튼 누르면 이미지변화
+            if (playImage != undefined) stop();
+            else start();
+        });
+        $("#select").on('click', function () {
+            var picValue = parseInt(slider.val());
+            var picSrc = "\"" + "frame/" + frameSrc + "/frame" + picValue + ".png" + "\"";
+            var imgAdd = "<img class=" + "\"" + "nav-item" + "\"" + "number=" + picValue + " src=" + picSrc + ">";
+            var overlapIndex = picNumber.findIndex((element, index, arr) => element === picValue);
+            if (picNumber.length == 10) { return; }//개수조절
+            if (overlapIndex !== -1) { return; }
+            if (picNumber.length === 0) {
+                picNumber.push(picValue);
+                $("#summery").append(imgAdd);
+            }
+            else if (picValue < picNumber[0]) {
+                picNumber.unshift(picValue);
+                $("#summery").prepend(imgAdd);
+            }
+            else if (picValue > picNumber[picNumber.length - 1]) {
+                picNumber.push(picValue);
+                $("#summery").append(imgAdd);
+            }
+            else {
+                for (var i = 0; i < $("#slider").attr('max'); i++) {
+                    if (picValue > picNumber[i]) {
+                        continue;
+                    }
+                    else {
+                        picNumber.splice(i, 0, picValue); //i번째에 0개 삭제하고 picValue 추가
+                        $('#summery > img').eq(i).before(imgAdd);
+                        break;
+                    }
+                }
+            }
+            var imgCount = $("#summery img").length;
+            $("#imgCount").val(imgCount + "개 선택함");
+            $("#srcData").val(picNumber);
+
+        });
+        $("#clickTwo").on('click', function () {
+            check = function () {
+                count = $("#summery img").length;
+                if (count != 10) {
+                    alert("10개 입력하세요");
+                    return false;
+                }
+                else
+                    return true;
+            }
+        })
+        $(document).on("click", "#summery img", function () {//이미지 누르면 삭제
+            var idx = $(this).index();
+            $('#summery img').eq(idx).remove();
+            picNumber.splice(idx, 1);//idx번째에 1개 삭제
+            $("#srcData").val(picNumber);
+            var imgCount = $("#summery img").length;
+            $("#imgCount").val(imgCount + "개 선택함");
+        });
+        $("#next").on('click', function () {
+            nextValue = parseInt(slider.val()) + 1;
+            slider.val(nextValue);
+            updateImage();
+            $("#frameNumber").val(slider.val());
+        });
+        $("#pre").on('click', function () {
+            var preValue = parseInt(slider.val()) - 1;
+            slider.val(preValue);
+            updateImage();
+            $("#frameNumber").val(slider.val());
+        });
+        $('#jsonNumber').attr("value", jsonInput.cur + "/" + jsonInput.size);
+        for (var i = 0; i < 180; i++) {
+            $("#frameList").append("<img id=" + "\"" + "frameSize" + "\"" + "src=" + "\"" + "frame/" + frameSrc + "/frame" + i + ".png" + "\"" + ">");
+        }
+        $("#page").val(pageNumber);
+
+        $("#frameNumber").keyup(function () {
+            $("#centerImg").attr("src", "frame/" + frameSrc + "/frame" + $(this).val() + ".png");
+            $("#slider").val($(this).val());
+            console.log($(this).val())
+        });
+        mysqlSplit = mysqlData.split(',');
+        if (mysqlData != null) {
+            for (var i = 0; i < mysqlSplit.length; i++) {
+                picNumber[i] = parseInt(mysqlSplit[i]);
+            }
+            for (var i = 0; i < picNumber.length; i++) {
+                var imgSrc = "\"" + "frame/" + frameSrc + "/frame" + picNumber[i] + ".png" + "\"";
+                $("#summery").append("<img class=" + "\"" + "nav-item" + "\"" + "number=" + (picNumber[i]) + " src=" + imgSrc + ">");
+            }
+            $("#srcData").val(picNumber);
+        }
+    });
+</script>
+
+<body class="container">
+<img id="centerImg" src=>
+<input type="range" id="slider" value="0" min="0" max="179">
+<div id="frameList">
+</div>
+<form id="rangeForm">
+    <input id="pre" class="slideButton" type="button" value="이전">
+    <input id="continueImg" class="slideButton" type="button" value="재생">
+    <input id="next" class="slideButton" type="button" value="다음">
+    <input id="select" type="button" value="선택">
+    <input id="frameNumber" class="" size="3" type="text" value>
+    <input id="imgCount" type="text" size="10" value="" readonly>
+</form>
+<div id="summery" class="m-5  nav justify-content-center bg-light">
+</div>
+<form id="submitForm" action="#" th:action="@{/webImg}" th:object="${webImg}" method="post"
+      onsubmit="return check()">
+    <button id="clickOne" class="btn-lg" type="submit" th:formaction="@{/webImg2}">click1</button>
+    <input id="jsonNumber" readonly class="btn-lg" size=3 type="text" value="">
+    <input id="srcData" type="hidden" name="content" value="">
+    <input id="page" type="hidden" name="pageCount" value>
+    <button id="clickTwo" class="btn-lg" type="submit">click2</button>
+</form>
+</body>
+
+</html>
