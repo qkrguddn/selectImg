@@ -83,7 +83,7 @@ public class WebImgController {
         }
         webImg.setFrameName(directories[pageNumber]);
         System.out.println("pageNumber: " + pageNumber + " frameName: " + webImg.getFrameName()
-                + "\n" + "arr: " + Arrays.toString(directories));
+                  + "\n" + "arr: " + Arrays.toString(directories));
         //findById() mysql의 마지막 id넣기
         webImg.setFinalId(Long.valueOf(String.valueOf(imgMsgRepository.findAllByOrderByIdDesc().get(0))));
         Long finalId = webImg.getFinalId();
