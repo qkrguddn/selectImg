@@ -90,7 +90,7 @@ public class WebImgController {
         ImgMsg mysqlData = imgMsgRepository.findById(finalId.intValue());
         LOG.info(mysqlData.idData());
         webImg.setMysqlData(mysqlData.idData());
-        imgMsgRepository.deleteById(finalId);//mysql의 마지막 id넣기
+        imgMsgRepository.deleteById(finalId);//mysql의 마지막 id넣기.
         return "webImg";
     }
 }
