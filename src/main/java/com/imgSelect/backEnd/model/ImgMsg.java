@@ -1,5 +1,5 @@
 
-package com.example.demo.model;
+package com.imgSelect.backEnd.model;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

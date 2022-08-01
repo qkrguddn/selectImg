@@ -1,5 +1,4 @@
-package com.example.demo.model;
-import java.util.ArrayList;
+package com.imgSelect.backEnd.model;
 import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 

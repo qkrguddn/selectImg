@@ -1,21 +1,17 @@
-package com.example.demo.controller;
+package com.imgSelect.backEnd.controller;
 
-import com.example.demo.model.ImgMsgRepository;
-import com.example.demo.model.ImgMsg;;
+import com.imgSelect.backEnd.model.ImgMsgRepository;
+import com.imgSelect.backEnd.model.ImgMsg;;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.BindingResult;
 
-import javax.validation.Valid;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
-import java.util.List;
 
 @Controller
 public class WebImgController {
@@ -35,7 +31,6 @@ public class WebImgController {
         model.addAttribute("webImg", webImg);
         LOG.info(webImg.getContent());
         ImgMsg data = new ImgMsg(webImg.getContent());
-//        imgMsgRepository.deleteAll();
         imgMsgRepository.save(data);
         int pageNumber = webImg.getPageCount();
         webImg.setPageCount(++pageNumber);
